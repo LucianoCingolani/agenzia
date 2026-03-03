@@ -1,0 +1,70 @@
+{% extends 'gestion/base.html' %}
+
+{% block title %}Cargar Comprobante - AgenzIA{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-file-earmark-arrow-up text-primary h3 mb-0"></i>
+                    </div>
+                    <h3 class="fw-bold">Nuevo Gasto</h3>
+                    <p class="text-muted small">Cargá el ticket para organizar tu caja</p>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">¿Qué compraste?</label>
+                        {{ form.descripcion }}
+                        <div class="form-text">Ej: Insumos de limpieza, Luz, Alquiler.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Monto Total Real ($)</label>
+                        {{ form.monto_total_real }}
+                        <div class="form-text text-info">Lo que pagaste realmente (con o sin factura).</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Comprobante (Opcional)</label>
+                        <div class="upload-area border border-2 border-dashed rounded-3 p-4 text-center position-relative bg-light" id="drop-zone">
+                            <i class="bi bi-cloud-upload text-secondary h2"></i>
+                            <p class="small text-secondary mb-0" id="file-name">Arrastrá el PDF o hacé clic aquí</p>
+                            {{ form.archivo_factura }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm">
+                            <i class="bi bi-cpu me-2"></i>Guardar y Procesar
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-link text-decoration-none text-muted">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .upload-area { cursor: pointer; transition: all 0.2s; }
+    .upload-area:hover { border-color: #0d6efd !important; background-color: #f1f7ff !important; }
+    input[type="file"] { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0; cursor: pointer; }
+</style>
+
+<script>
+    document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            let fileName = e.target.files[0].name;
+            document.getElementById('file-name').innerText = "Archivo listo: " + fileName;
+            document.getElementById('file-name').classList.replace('text-secondary', 'text-primary');
+            document.getElementById('file-name').classList.add('fw-bold');
+        }
+    });
+</script>
+{% endblock %}
