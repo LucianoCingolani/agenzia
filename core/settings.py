@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.config(default='postgresql://postgres:wjUfWbZCgIDpjdDXxIXmXlAFudDaHcHw@turntable.proxy.rlwy.net:12729/railway')
+    "default": dj_database_url.config(default=env('DATABASE_URL'))
 }
 
 
