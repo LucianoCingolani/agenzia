@@ -76,6 +76,7 @@
                     <th>Fecha</th>
                     <th>Descripción</th>
                     <th>Categoría</th>
+                    <th>Método de Pago</th>
                     <th>Tipo</th>
                     <th class="text-end">Monto</th>
                 </tr>
@@ -86,6 +87,9 @@
                     <td>{{ g.fecha|date:"d/m/Y" }}</td>
                     <td>{{ g.descripcion }}</td>
                     <td><span class="badge bg-secondary">{{ g.get_categoria_display }}</span></td>
+                    <td><span class="badge bg-info">
+                        {% if g.metodo_pago == 'EFECTIVO' %}<i class="bi bi-cash"></i> Efectivo{% elif g.metodo_pago == 'MERCADO_PAGO' %} <img src="../../../media/facturas/icons8-mercado-pago.svg" height="18" width="18"> Mercado Pago{% elif g.metodo_pago == 'TRANSFERENCIA' %}<i class="bi bi-bank"></i> Transferencia Bancaria{% else %}Otro{% endif %}
+                    </span></td>
                     <td>
                         {% if g.tipo == 'FIJO' %}
                             <span class="badge border text-dark" style="background-color: #e3f2fd;">Fijo</span>
@@ -158,6 +162,15 @@
                                 <span class="input-group-text">$</span>
                                 <input type="number" name="monto" step="0.01" class="form-control" placeholder="0.00" required>
                             </div>
+                        </div>
+                        <div class="col-md-7 mb-3">
+                            <label class="form-label fw-bold small">Metodo de Pago</label>
+                            <select name="metodo_pago" class="form-select" required>
+                                <option value="EFECTIVO">Efectivo</option>
+                                <option value="MERCADO_PAGO">Mercado Pago</option>
+                                <option value="TRANSFERENCIA">Transferencia Bancaria</option>
+                                <option value="OTRO">Otro</option>
+                            </select>
                         </div>
                     </div>
                 </div>

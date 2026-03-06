@@ -57,14 +57,16 @@ def gestion_gastos_generales(request):
         categoria = request.POST.get('categoria')
         monto = request.POST.get('monto')
         tipo = request.POST.get('tipo')
+        metodo_pago = request.POST.get('metodo_pago')
         fecha_manual = request.POST.get('fecha_gasto')
 
-        if descripcion and categoria and monto and tipo:
+        if descripcion and categoria and monto and tipo and metodo_pago:
             GastoGeneral.objects.create(
                 descripcion=descripcion,
                 categoria=categoria,
                 monto=monto,
                 tipo=tipo,
+                metodo_pago=metodo_pago,
                 fecha=fecha_manual if fecha_manual else timezone.now()
             )
         return redirect('gastos_generales')
@@ -107,7 +109,7 @@ def gestion_gastos_generales(request):
         'total': total_filtrado,
         'categorias': GastoGeneral.CATEGORIAS,
         'tipos': [('FIJO', 'Gasto Fijo'), ('VARIABLE', 'Gasto Variable')],
-        
+        'metodos_pago': GastoGeneral.METODOS_PAGO,
         # Datos para Chart.js
         'labels_js': json.dumps(labels),
         'valores_js': json.dumps(valores),
@@ -117,6 +119,7 @@ def gestion_gastos_generales(request):
         'f_hasta': f_hasta,
         'c_filtro': c_filtro,
         't_filtro': t_filtro,
+        'm_filtro': request.GET.get('metodo_pago', ''),
     })
 
 def exportar_gastos_excel(request):
@@ -127,6 +130,7 @@ def exportar_gastos_excel(request):
     f_hasta = request.GET.get('fecha_hasta')
     c_filtro = request.GET.get('categoria_filtro')
     t_filtro = request.GET.get('tipo_filtro')
+    m_filtro = request.GET.get('metodo_pago')
 
     # LIMPIEZA DE FILTROS: Solo filtramos si el valor existe y no es el string "None"
     if f_desde and f_desde != "None" and f_desde != "":
@@ -137,6 +141,8 @@ def exportar_gastos_excel(request):
         gastos = gastos.filter(categoria=c_filtro)
     if t_filtro and t_filtro != "None" and t_filtro != "":
         gastos = gastos.filter(tipo=t_filtro)
+    if m_filtro and m_filtro != "None" and m_filtro != "":
+        gastos = gastos.filter(metodo_pago=m_filtro)
 
     # 2. Crear el libro de Excel
     wb = openpyxl.Workbook()
@@ -148,7 +154,7 @@ def exportar_gastos_excel(request):
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill(start_color="444444", end_color="444444", fill_type="solid")
 
-    headers = ['Fecha', 'Descripción', 'Categoría', 'Tipo', 'Monto ($)']
+    headers = ['Fecha', 'Descripción', 'Categoría', 'Tipo', 'Método de Pago', 'Monto ($)']
     ws.append(headers)
 
     # Aplicar estilos a los encabezados
@@ -163,6 +169,7 @@ def exportar_gastos_excel(request):
             gasto.descripcion,
             gasto.get_categoria_display(),
             gasto.get_tipo_display(),
+            gasto.get_metodo_pago_display(),
             float(gasto.monto) # Importante: enviar como float para que Excel lo sume
         ])
 

@@ -35,11 +35,19 @@ class GastoGeneral(models.Model):
             ('FIJO', 'Gasto Fijo'),
             ('VARIABLE', 'Gasto Variable'),
     ]
-
+    METODOS_PAGO = [
+        ('EFECTIVO', 'Efectivo'),
+        ('MERCADO_PAGO', 'Mercado Pago'),
+        ('TRANSFERENCIA', 'Transferencia Bancaria'),
+        ('OTRO', 'Otro'),
+    ]
+    
     fecha = models.DateField(default=timezone.now)
     descripcion = models.CharField(max_length=200)
     categoria = models.CharField(max_length=20, choices=CATEGORIAS)
     tipo = models.CharField(max_length=10, choices=TIPOS, default='VARIABLE')
+    metodo_pago = models.CharField(max_length=20, choices=METODOS_PAGO, default='EFECTIVO')
+    
     monto = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
