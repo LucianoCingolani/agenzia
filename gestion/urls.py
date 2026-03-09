@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, subir_factura, home
+from .views import dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, inventario_dashboard, subir_factura, home
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('gastos/exportar/', exportar_gastos_excel, name='exportar_gastos_excel'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('inventario/', inventario_dashboard, name='inventario_dashboard'),
     path('', home, name='home'),
 ]
