@@ -10,5 +10,5 @@ urlpatterns = [
     path('gastos/exportar/', exportar_gastos_excel, name='exportar_gastos_excel'),
     path('login/', auth_views.LoginView.as_view(), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('/', home, name='home'),
+    path('', home, name='home'),
 ]
