@@ -14,24 +14,29 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold m-0">Control de Stock</h2>
         
-        <button class="btn btn-outline-primary btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUpload">
-            <i class="bi bi-file-earmark-pdf"></i> Actualizar inventario desde PDF
+        <button class="btn btn-outline-success btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUpload">
+            <i class="bi bi-file-earmark-excel"></i> Cargar Inventario Excel
         </button>
     </div>
 
     <div class="collapse mb-4" id="collapseUpload">
-        <div class="card card-body border-0 shadow-sm" style="border-radius: 15px; background-color: #f8f9fa;">
-            <form method="POST" enctype="multipart/form-data" action="{% url 'procesar_stock_pdf' %}">
+        <div class="card card-body border-0 shadow-sm" style="border-radius: 15px; background-color: #f0fdf4;">
+            <form method="POST" enctype="multipart/form-data" action="{% url 'subir_inventario_excel' %}">
                 {% csrf_token %}
                 <div class="row align-items-center">
                     <div class="col-md-9">
-                        <input type="file" name="archivo_pdf" class="form-control" accept=".pdf" required>
+                        <label class="form-label small fw-bold text-success">Seleccioná el archivo "stock valorizado.xlsx"</label>
+                        <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required>
                     </div>
-                    <div class="col-md-3">
-                        <button type="submit" class="btn btn-primary w-100">Subir y Actualizar</button>
+                    <div class="col-md-3 mt-3 mt-md-0">
+                        <button type="submit" class="btn btn-success w-100 mt-md-4">
+                            Subir y Actualizar
+                        </button>
                     </div>
                 </div>
-                <small class="text-muted mt-2 d-block">Subí el archivo "stock valorizado.pdf" para actualizar cantidades automáticamente.</small>
+                <p class="small text-muted mt-2 mb-0">
+                    <i class="bi bi-info-circle"></i> El sistema procesará automáticamente las descripciones y los niveles de stock.
+                </p>
             </form>
         </div>
     </div>

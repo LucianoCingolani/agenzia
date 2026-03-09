@@ -4,9 +4,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 import openpyxl
-import pdfplumber
-import re
-from gestion.services import procesar_pdf_solo_crear
+from gestion.services import procesar_excel_stock_limpio
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
@@ -219,21 +217,22 @@ def inventario_dashboard(request):
     })
 
 @login_required
-def procesar_stock_pdf(request):
-    if request.method == 'POST' and request.FILES.get('archivo_pdf'):
-        pdf_file = request.FILES['archivo_pdf']
-        pdf_file.seek(0) 
+def subir_inventario_excel(request):
+    if request.method == 'POST' and request.FILES.get('archivo_excel'):
+        archivo = request.FILES['archivo_excel']
         
+        if not archivo.name.endswith('.xlsx'):
+            messages.error(request, "Por favor, subí un archivo con formato .xlsx")
+            return redirect('inventario_dashboard')
+
         try:
-            creados, ignorados = procesar_pdf_solo_crear(pdf_file)
-            if creados == 0:
-                messages.info(request, f"No se crearon productos nuevos. {ignorados} ya existían en el sistema.")
-            else:
-                messages.success(request, f"Se agregaron {creados} productos nuevos con stock en 0. Se ignoraron {ignorados} que ya tenías.")
+            creados, actualizados = procesar_excel_stock_limpio(archivo)
+            messages.success(request, f"¡Proceso completado! Se crearon {creados} productos y se actualizaron {actualizados}.")
         except Exception as e:
-            messages.error(request, f"Error técnico: {str(e)}")
+            messages.error(request, f"Hubo un problema al procesar el Excel: {str(e)}")
             
     return redirect('inventario_dashboard')
+
 
 @login_required
 def actualizar_stock_manual(request, producto_id):

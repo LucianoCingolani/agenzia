@@ -1,42 +1,41 @@
-import pdfplumber
-import re
+import openpyxl
 from .models import Producto
 
-def procesar_pdf_solo_crear(file_obj):
+def procesar_excel_stock_limpio(file_obj):
+    # Cargamos el libro de trabajo de Excel
+    wb = openpyxl.load_workbook(file_obj)
+    sheet = wb.active # Toma la hoja activa
+    
     creados = 0
-    ignorados = 0
+    actualizados = 0
 
-    with pdfplumber.open(file_obj) as pdf:
-        for page in pdf.pages:
-            text = page.extract_text()
-            if not text: continue
+    # Iteramos desde la fila 1 (o 2 si dejaste el encabezado)
+    for row in sheet.iter_rows(values_only=True):
+        # Según tus archivos: row[0] es Descripción, row[1] es Stock
+        nombre_raw = row[0]
+        stock_raw = row[1]
 
-            lines = text.split('\n')
-            for line in lines:
-                # 1. Limpieza de comillas y espacios
-                clean_line = line.replace('"', '').strip()
-                
-                # 2. Separar por coma
-                parts = clean_line.split(',')
-                
-                # VALIDACIÓN: Tu PDF tiene [Código, Descripción, Marca, Costo...]
-                # Necesitamos que tenga al menos 2 partes y que no sea el encabezado
-                if len(parts) < 2 or "Código" in parts[0] or "Descripción" in parts[1]:
-                    continue
+        # Validamos que no sea una fila vacía o el encabezado
+        if not nombre_raw or str(nombre_raw).strip().lower() == 'descripción':
+            continue
 
-                # 3. ASIGNACIÓN CORRECTA:
-                # parts[0] es el Código (79, 1793, etc.)
-                # parts[1] es la Descripción (AC GRANEL, ACONDICIONADOR, etc.)
-                nombre_real = parts[1].strip()
+        nombre = str(nombre_raw).strip()
+        
+        try:
+            # Convertimos el stock a número (manejando posibles decimales como 282.2)
+            stock_valor = int(float(str(stock_raw)))
+        except (ValueError, TypeError):
+            stock_valor = 0
 
-                if nombre_real:
-                    # Usamos el nombre real para crear el producto
-                    obj, created = Producto.objects.get_or_create(
-                        nombre=nombre_real,
-                        defaults={'stock_actual': 0}
-                    )
-                    
-                    if created: creados += 1
-                    else: ignorados += 1
-                    
-    return creados, ignorados
+        # update_or_create: busca por nombre, si no está lo crea, si está lo actualiza
+        obj, created = Producto.objects.update_or_create(
+            nombre=nombre,
+            defaults={'stock_actual': stock_valor}
+        )
+
+        if created:
+            creados += 1
+        else:
+            actualizados += 1
+
+    return creados, actualizados
