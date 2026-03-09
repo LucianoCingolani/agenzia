@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Operacion, GastoGeneral
+from .models import Operacion, GastoGeneral, Producto
 
 @admin.register(Operacion)
 class OperacionAdmin(admin.ModelAdmin):
@@ -24,3 +24,9 @@ class GastoGeneralAdmin(admin.ModelAdmin):
     list_filter = ('categoria', 'tipo', 'fecha')
     search_fields = ('descripcion',)
     ordering = ('-fecha',)
+
+
+@admin.register(Producto)
+class ProductoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'stock_actual', 'umbral_minimo')
+    search_fields = ('nombre',)
