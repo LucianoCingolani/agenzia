@@ -193,3 +193,6 @@ def exportar_gastos_excel(request):
     response['Content-Disposition'] = f'attachment; filename="Gastos_{timezone.now().strftime("%m_%Y")}.xlsx"'
     wb.save(response)
     return response
+
+def home(request):
+    return render(request, 'gestion/home.html')

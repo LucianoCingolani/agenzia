@@ -1,0 +1,37 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Panel de Control - Prisma AI</h1> <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Control de Gastos</h5>
+                    <p class="card-text">Gestioná los egresos y visualizá reportes.</p>
+                    <a href="{% url 'gastos_generales' %}" class="btn btn-primary">Ir a Gastos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-warning">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Inventario y Stock</h5>
+                    <p class="card-text">Controlá umbrales y alertas de reposición.</p>
+                    <a href="{% url 'dashboard' %}" class="btn btn-warning">Ver Stock</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Carga de Facturas</h5>
+                    <p class="card-text">Subí fotos o PDFs para procesar con IA.</p>
+                    <a href="{% url 'subir_factura' %}" class="btn btn-secondary">Subir Archivo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

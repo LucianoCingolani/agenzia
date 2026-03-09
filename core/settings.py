@@ -131,7 +131,7 @@ CSRF_TRUSTED_ORIGINS = [
 LOGIN_URL = 'login'
 
 # URL a la que va el usuario después de loguearse con éxito
-LOGIN_REDIRECT_URL = 'gastos_generales'
+LOGIN_REDIRECT_URL = 'home'
 
 # URL a la que va después de cerrar sesión
 LOGOUT_REDIRECT_URL = 'login'
