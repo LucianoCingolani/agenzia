@@ -194,5 +194,6 @@ def exportar_gastos_excel(request):
     wb.save(response)
     return response
 
+@login_required
 def home(request):
     return render(request, 'gestion/home.html')
