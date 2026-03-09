@@ -8,41 +8,47 @@ def procesar_pdf_stock(file_obj):
 
     with pdfplumber.open(file_obj) as pdf:
         for page in pdf.pages:
-            # Extraemos la tabla del PDF
+            # Extraemos la tabla
             table = page.extract_table()
             if not table:
                 continue
 
             for row in table:
-                # 1. Limpiamos cada celda de saltos de línea y espacios
-                row = [str(c).replace('\n', ' ').strip() if c else "" for c in row]
+                # 1. Limpieza total de la fila: quitamos comillas, saltos de línea y espacios extras
+                row = [str(cell).replace('"', '').replace('\n', ' ').strip() if cell else "" for cell in row]
 
-                # 2. Ignoramos encabezados o filas vacías
-                if not row or "Descripción" in row[1] or not row[1]:
+                # 2. Validación de fila de datos
+                # Debe tener al menos 5 columnas y la descripción (row[1]) no debe ser vacía ni el encabezado
+                if len(row) < 5 or not row[1] or "Descripción" in row[1] or "Código" in row[0]:
                     continue
 
                 try:
-                    # row[1] es la Descripción del producto
-                    nombre = row[1] 
+                    # row[1] es la Descripción (Nombre del producto)
+                    nombre = row[1]
                     
-                    # row[4] es el Stock. Limpiamos puntos finales y comas
-                    stock_raw = row[4].replace(',', '.')
-                    # Usamos regex para quedarnos solo con el número (ej: de "112." a "112")
-                    match = re.search(r"(\d+)", stock_raw)
+                    # row[4] es el Stock (ejemplo: "282,2" o "112.")
+                    stock_raw = row[4].replace(',', '.') # Cambiamos coma por punto para decimales
+                    
+                    # Usamos regex para extraer solo los números y el punto decimal
+                    # Esto limpia casos como "112." (lo deja como "112") o "282.2"
+                    match = re.search(r"(\d+\.?\d*)", stock_raw)
                     if not match:
                         continue
                     
-                    stock_valor = int(match.group(1))
+                    # Convertimos a float y luego a int (o lo dejamos en float si preferís)
+                    stock_valor = int(float(match.group(1)))
 
-                    # Actualizamos si existe, creamos si no
+                    # Guardar o actualizar en la base de datos
                     obj, created = Producto.objects.update_or_create(
                         nombre=nombre,
                         defaults={'stock_actual': stock_valor}
                     )
                     
-                    if created: creados += 1
-                    else: actualizados += 1
-                except (IndexError, ValueError):
+                    if created:
+                        creados += 1
+                    else:
+                        actualizados += 1
+                except (IndexError, ValueError, Exception):
                     continue
                     
     return creados, actualizados

@@ -3,6 +3,14 @@
 {% block content %}
 <div class="container mt-5">
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} shadow-sm border-0">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold m-0">Control de Stock</h2>
         
