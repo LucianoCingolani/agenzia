@@ -4,7 +4,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
 import openpyxl
-
+import pdfplumber
+import re
 from gestion.services import procesar_pdf_stock
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
@@ -218,12 +219,37 @@ def inventario_dashboard(request):
     })
 
 @login_required
-def subir_stock_pdf(request):
+def procesar_stock_pdf(request):
     if request.method == 'POST' and request.FILES.get('archivo_pdf'):
-        pdf = request.FILES['archivo_pdf']
-        creados, actualizados = procesar_pdf_stock(pdf)
-        
-        messages.success(request, f"Proceso terminado: {creados} productos nuevos y {actualizados} actualizados.")
-        return redirect('inventario_dashboard')
+        pdf_file = request.FILES['archivo_pdf']
+        creados = 0
+        actualizados = 0
+
+        with pdfplumber.open(pdf_file) as pdf:
+            for page in pdf.pages:
+                table = page.extract_table()
+                if not table: continue
+
+                for row in table:
+                    if not row or "Código" in str(row[0]): continue
+                    
+                    try:
+                        nombre = str(row[1]).strip().replace('\n', ' ')
+                        # Limpiamos el stock: el PDF trae "282,2" o "112."
+                        stock_str = str(row[4]).replace('.', '').replace(',', '.')
+                        stock_valor = int(float(re.sub(r'[^\d.]', '', stock_str)))
+
+                        # get_or_create: busca por nombre, si no existe lo crea
+                        obj, created = Producto.objects.update_or_create(
+                            nombre=nombre,
+                            defaults={'stock_actual': stock_valor}
+                        )
+                        
+                        if created: creados += 1
+                        else: actualizados += 1
+                    except (IndexError, ValueError, TypeError):
+                        continue
+
+        messages.success(request, f"Éxito: {creados} productos nuevos y {actualizados} actualizados.")
     
-    return render(request, 'gestion/subir.html')
+    return redirect('inventario_dashboard')
