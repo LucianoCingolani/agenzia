@@ -58,6 +58,10 @@
         {% endif %}
     </div>
 
+    <div class="mb-4">
+        <input type="text" id="searchInput" class="form-control" placeholder="Buscar producto por nombre..." onkeyup="filterTable()">
+    </div>
+
     <div class="card card-custom shadow-sm border-0 mt-4" style="border-radius: 15px;">
         <div class="card-body p-4">
             <table class="table table-hover align-middle">
@@ -100,4 +104,21 @@
         </div>
     </div>
 </div>
+
+<script>
+function filterTable() {
+    let input = document.getElementById("searchInput");
+    let filter = input.value.toUpperCase();
+    let table = document.querySelector("table");
+    let tr = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < tr.length; i++) {
+        let td = tr[i].getElementsByTagName("td")[0]; // Columna de Nombre
+        if (td) {
+            let textValue = td.textContent || td.innerText;
+            tr[i].style.display = textValue.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        }
+    }
+}
+</script>
 {% endblock %}
