@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404, render
 import openpyxl
 import pdfplumber
 import re
-from gestion.services import procesar_pdf_solo_crear, procesar_pdf_stock
+from gestion.services import procesar_pdf_solo_crear
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
