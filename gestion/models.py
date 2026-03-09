@@ -52,3 +52,15 @@ class GastoGeneral(models.Model):
 
     def __str__(self):
         return f"{self.descripcion} - {self.monto}"
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=100)
+    stock_actual = models.IntegerField(default=0)
+    umbral_minimo = models.IntegerField(default=5, help_text="Avisar cuando el stock sea menor a este número")
+    
+    @property
+    def necesita_reposicion(self):
+        return self.stock_actual <= self.umbral_minimo
+
+    def __str__(self):
+        return f"{self.nombre} ({self.stock_actual})"

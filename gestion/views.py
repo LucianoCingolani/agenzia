@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
 import openpyxl
-from .models import GastoGeneral, Operacion
+from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
 from django.shortcuts import redirect
@@ -197,3 +197,14 @@ def exportar_gastos_excel(request):
 @login_required
 def home(request):
     return render(request, 'gestion/home.html')
+
+@login_required
+def inventario_dashboard(request):
+    productos = Producto.objects.all()
+    # Filtramos los que están en zona crítica para la sección de alertas
+    alertas = [p for p in productos if p.necesita_reposicion]
+    
+    return render(request, 'gestion/inventario.html', {
+        'productos': productos,
+        'alertas': alertas
+    })

@@ -1,0 +1,49 @@
+{% extends "gestion/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4">Control de Stock</h2>
+
+    {% if alertas %}
+    <div class="alert alert-warning border-0 shadow-sm mb-5" style="background-color: #fff3cd; border-radius: 12px;">
+        <h5 class="alert-heading"><i class="bi bi-exclamation-triangle-fill me-2"></i>Productos por agotarse</h5>
+        <ul class="mb-0">
+            {% for item in alertas %}
+            <li><strong>{{ item.nombre }}</strong>: Quedan solo {{ item.stock_actual }} unidades (Umbral: {{ item.umbral_minimo }}).</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="card card-custom shadow-sm border-0" style="border-radius: 15px;">
+        <div class="card-body p-4">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock Actual</th>
+                        <th>Umbral</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in productos %}
+                    <tr>
+                        <td>{{ p.nombre }}</td>
+                        <td>{{ p.stock_actual }}</td>
+                        <td>{{ p.umbral_minimo }}</td>
+                        <td>
+                            {% if p.necesita_reposicion %}
+                            <span class="badge bg-danger-subtle text-danger p-2 px-3" style="border-radius: 20px;">Reponer Ya</span>
+                            {% else %}
+                            <span class="badge bg-success-subtle text-success p-2 px-3" style="border-radius: 20px;">OK</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
