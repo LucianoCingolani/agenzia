@@ -1,8 +1,11 @@
 import json
+from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
 import openpyxl
+
+from gestion.services import procesar_pdf_stock
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
@@ -213,3 +216,14 @@ def inventario_dashboard(request):
         'stock_ok': stock_ok,
         'todos': todos
     })
+
+@login_required
+def subir_stock_pdf(request):
+    if request.method == 'POST' and request.FILES.get('archivo_pdf'):
+        pdf = request.FILES['archivo_pdf']
+        creados, actualizados = procesar_pdf_stock(pdf)
+        
+        messages.success(request, f"Proceso terminado: {creados} productos nuevos y {actualizados} actualizados.")
+        return redirect('inventario_dashboard')
+    
+    return render(request, 'gestion/subir.html')

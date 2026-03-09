@@ -24,6 +24,15 @@
         {% endif %}
     </div>
 
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="archivo_pdf" class="form-label">Seleccionar PDF de Stock Valorizado</label>
+            <input type="file" name="archivo_pdf" class="form-control" accept="application/pdf" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Cargar Inventario</button>
+    </form>
+
     <div class="card card-custom shadow-sm border-0 mt-4" style="border-radius: 15px;">
         <div class="card-body p-4">
             <table class="table table-hover align-middle">
