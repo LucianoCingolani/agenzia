@@ -2,43 +2,47 @@ import pdfplumber
 import re
 from .models import Producto
 
-def procesar_pdf_stock(file_path):
-    productos_creados = 0
-    productos_actualizados = 0
+def procesar_pdf_stock(file_obj):
+    creados = 0
+    actualizados = 0
 
-    with pdfplumber.open(file_path) as pdf:
+    with pdfplumber.open(file_obj) as pdf:
         for page in pdf.pages:
+            # Extraemos la tabla del PDF
             table = page.extract_table()
             if not table:
                 continue
-            
-            # Saltamos el encabezado si es la primera página
-            for row in table[1:]:
-                # Según tu PDF: [Código, Descripción, Marca, Costo, Stock, St. Valorizado]
-                # Usamos la descripción como nombre del producto
-                nombre_raw = row[1]
-                stock_raw = row[4]
 
-                if nombre_raw and stock_raw:
-                    # Limpiamos el nombre y convertimos el stock a número
-                    nombre = nombre_raw.strip().replace('\n', ' ')
+            for row in table:
+                # 1. Limpiamos cada celda de saltos de línea y espacios
+                row = [str(c).replace('\n', ' ').strip() if c else "" for c in row]
+
+                # 2. Ignoramos encabezados o filas vacías
+                if not row or "Descripción" in row[1] or not row[1]:
+                    continue
+
+                try:
+                    # row[1] es la Descripción del producto
+                    nombre = row[1] 
                     
-                    try:
-                        # Limpiamos caracteres no numéricos del stock (como comas o puntos de miles)
-                        stock_limpio = re.sub(r'[^\d.]', '', stock_raw.replace(',', '.'))
-                        stock = int(float(stock_limpio))
-                    except (ValueError, TypeError):
+                    # row[4] es el Stock. Limpiamos puntos finales y comas
+                    stock_raw = row[4].replace(',', '.')
+                    # Usamos regex para quedarnos solo con el número (ej: de "112." a "112")
+                    match = re.search(r"(\d+)", stock_raw)
+                    if not match:
                         continue
+                    
+                    stock_valor = int(match.group(1))
 
-                    # Lógica de Django: Buscar por nombre, si no existe lo crea
+                    # Actualizamos si existe, creamos si no
                     obj, created = Producto.objects.update_or_create(
                         nombre=nombre,
-                        defaults={'stock_actual': stock}
+                        defaults={'stock_actual': stock_valor}
                     )
-
-                    if created:
-                        productos_creados += 1
-                    else:
-                        productos_actualizados += 1
-    
-    return productos_creados, productos_actualizados
+                    
+                    if created: creados += 1
+                    else: actualizados += 1
+                except (IndexError, ValueError):
+                    continue
+                    
+    return creados, actualizados

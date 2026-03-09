@@ -222,34 +222,15 @@ def inventario_dashboard(request):
 def procesar_stock_pdf(request):
     if request.method == 'POST' and request.FILES.get('archivo_pdf'):
         pdf_file = request.FILES['archivo_pdf']
-        creados = 0
-        actualizados = 0
-
-        with pdfplumber.open(pdf_file) as pdf:
-            for page in pdf.pages:
-                table = page.extract_table()
-                if not table: continue
-
-                for row in table:
-                    if not row or "Código" in str(row[0]): continue
-                    
-                    try:
-                        nombre = str(row[1]).strip().replace('\n', ' ')
-                        # Limpiamos el stock: el PDF trae "282,2" o "112."
-                        stock_str = str(row[4]).replace('.', '').replace(',', '.')
-                        stock_valor = int(float(re.sub(r'[^\d.]', '', stock_str)))
-
-                        # get_or_create: busca por nombre, si no existe lo crea
-                        obj, created = Producto.objects.update_or_create(
-                            nombre=nombre,
-                            defaults={'stock_actual': stock_valor}
-                        )
-                        
-                        if created: creados += 1
-                        else: actualizados += 1
-                    except (IndexError, ValueError, TypeError):
-                        continue
-
-        messages.success(request, f"Éxito: {creados} productos nuevos y {actualizados} actualizados.")
-    
+        pdf_file.seek(0) 
+        
+        try:
+            creados, actualizados = procesar_pdf_stock(pdf_file)
+            if creados == 0 and actualizados == 0:
+                messages.warning(request, "No se detectaron productos válidos. Revisá el formato del PDF.")
+            else:
+                messages.success(request, f"Éxito: {creados} productos nuevos y {actualizados} actualizados.")
+        except Exception as e:
+            messages.error(request, f"Error al procesar: {str(e)}")
+            
     return redirect('inventario_dashboard')
