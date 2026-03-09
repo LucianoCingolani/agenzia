@@ -2,11 +2,11 @@ import json
 from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 import openpyxl
 import pdfplumber
 import re
-from gestion.services import procesar_pdf_stock
+from gestion.services import procesar_pdf_solo_crear, procesar_pdf_stock
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
@@ -225,12 +225,27 @@ def procesar_stock_pdf(request):
         pdf_file.seek(0) 
         
         try:
-            creados, actualizados = procesar_pdf_stock(pdf_file)
-            if creados == 0 and actualizados == 0:
-                messages.warning(request, "No se detectaron productos válidos. Revisá el formato del PDF.")
+            creados, ignorados = procesar_pdf_solo_crear(pdf_file)
+            if creados == 0:
+                messages.info(request, f"No se crearon productos nuevos. {ignorados} ya existían en el sistema.")
             else:
-                messages.success(request, f"Éxito: {creados} productos nuevos y {actualizados} actualizados.")
+                messages.success(request, f"Se agregaron {creados} productos nuevos con stock en 0. Se ignoraron {ignorados} que ya tenías.")
         except Exception as e:
-            messages.error(request, f"Error al procesar: {str(e)}")
+            messages.error(request, f"Error técnico: {str(e)}")
+            
+    return redirect('inventario_dashboard')
+
+@login_required
+def actualizar_stock_manual(request, producto_id):
+    if request.method == 'POST':
+        producto = get_object_or_404(Producto, id=producto_id)
+        nuevo_stock = request.POST.get('nuevo_stock')
+        
+        try:
+            producto.stock_actual = int(nuevo_stock)
+            producto.save()
+            # No enviamos mensaje de éxito para no recargar con alertas molestas
+        except (ValueError, TypeError):
+            messages.error(request, "El valor ingresado no es válido.")
             
     return redirect('inventario_dashboard')

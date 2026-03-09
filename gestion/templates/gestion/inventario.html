@@ -73,7 +73,16 @@
                     {% for p in todos %}
                     <tr>
                         <td class="fw-bold">{{ p.nombre }}</td>
-                        <td>{{ p.stock_actual }}</td>
+                        <td>
+                            <form action="{% url 'actualizar_stock_manual' p.id %}" method="POST" class="d-flex align-items-center">
+                                {% csrf_token %}
+                                <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" 
+                                    class="form-control form-control-sm me-2" style="width: 80px;">
+                                <button type="submit" class="btn btn-sm btn-link p-0 text-primary">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                </button>
+                            </form>
+                        </td>
                         <td>{{ p.umbral_minimo }}</td>
                         <td>
                             {% if p.necesita_reposicion_urgente %}
@@ -81,7 +90,7 @@
                             {% elif p.necesita_reposicion %}
                                 <span class="badge bg-warning text-dark p-2 px-3" style="border-radius: 20px;">Pedir pronto</span>
                             {% else %}
-                                <span class="badge bg-success p-2 px-3" style="border-radius: 20px;">Suficiente</span>
+                                <span class="badge bg-success p-2 px-3" style="border-radius: 20px;">OK</span>
                             {% endif %}
                         </td>
                     </tr>
