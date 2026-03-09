@@ -63,7 +63,7 @@ class Producto(models.Model):
         return self.stock_actual <= self.umbral_minimo
     
     def necesita_reposicion(self):
-        return self.stock_actual <= self.umbral_minimo * 1.3
+        return self.stock_actual <= self.umbral_minimo * 1.5
 
     def __str__(self):
         return f"{self.nombre} ({self.stock_actual})"
