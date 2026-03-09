@@ -126,3 +126,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CSRF_TRUSTED_ORIGINS = [
     'https://agenzia-production.up.railway.app',
 ]
+
+# URL a la que redirige @login_required
+LOGIN_URL = 'login'
+
+# URL a la que va el usuario después de loguearse con éxito
+LOGIN_REDIRECT_URL = 'gastos_generales'
+
+# URL a la que va después de cerrar sesión
+LOGOUT_REDIRECT_URL = 'login'
