@@ -200,11 +200,16 @@ def home(request):
 
 @login_required
 def inventario_dashboard(request):
-    productos = Producto.objects.all()
-    # Filtramos los que están en zona crítica para la sección de alertas
-    alertas = [p for p in productos if p.necesita_reposicion]
+    todos = Producto.objects.all()
+    
+    # Clasificación por niveles de prioridad
+    criticos = [p for p in todos if p.necesita_reposicion_urgente]
+    advertencias = [p for p in todos if p.necesita_reposicion() and not p.necesita_reposicion_urgente]
+    stock_ok = [p for p in todos if not p.necesita_reposicion()]
     
     return render(request, 'gestion/inventario.html', {
-        'productos': productos,
-        'alertas': alertas
+        'criticos': criticos,
+        'advertencias': advertencias,
+        'stock_ok': stock_ok,
+        'todos': todos
     })

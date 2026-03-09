@@ -59,8 +59,11 @@ class Producto(models.Model):
     umbral_minimo = models.IntegerField(default=5, help_text="Avisar cuando el stock sea menor a este número")
     
     @property
-    def necesita_reposicion(self):
+    def necesita_reposicion_urgente(self):
         return self.stock_actual <= self.umbral_minimo
+    
+    def necesita_reposicion(self):
+        return self.stock_actual <= self.umbral_minimo * 1.3
 
     def __str__(self):
         return f"{self.nombre} ({self.stock_actual})"
