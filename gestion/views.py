@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import get_object_or_404, render
 import openpyxl
-from gestion.services import procesar_excel_stock_limpio
+from gestion.services import procesar_excel_stock_completo
 from .models import GastoGeneral, Operacion, Producto
 from django.db.models import Sum
 from .forms import FacturaUploadForm
@@ -226,8 +226,8 @@ def subir_inventario_excel(request):
             return redirect('inventario_dashboard')
 
         try:
-            creados, actualizados = procesar_excel_stock_limpio(archivo)
-            messages.success(request, f"¡Proceso completado! Se crearon {creados} productos y se actualizaron {actualizados}.")
+            creados, actualizados = procesar_excel_stock_completo(archivo)
+            messages.success(request, f"¡Éxito! Se procesaron todas las páginas. Total: {creados + actualizados} productos.")
         except Exception as e:
             messages.error(request, f"Hubo un problema al procesar el Excel: {str(e)}")
             
