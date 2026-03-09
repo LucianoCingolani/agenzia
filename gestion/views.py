@@ -1,5 +1,4 @@
 import json
-
 from django.http import HttpResponse
 from django.utils import timezone
 from django.shortcuts import render
@@ -9,7 +8,9 @@ from django.db.models import Sum
 from .forms import FacturaUploadForm
 from django.shortcuts import redirect
 from .utils.ia_utils import extraer_texto_pdf, procesar_con_ia
+from django.contrib.auth.decorators import login_required
 
+@login_required
 def dashboard_resumen(request):
     operaciones = Operacion.objects.all()
     
@@ -25,6 +26,7 @@ def dashboard_resumen(request):
         'operaciones': operaciones # Para ver la lista abajo
     })
 
+@login_required
 def subir_factura(request):
     if request.method == 'POST':
         form = FacturaUploadForm(request.POST, request.FILES)
@@ -50,6 +52,7 @@ def subir_factura(request):
         form = FacturaUploadForm()
     return render(request, 'gestion/subir.html', {'form': form})
 
+@login_required
 def gestion_gastos_generales(request):
     # 1. PROCESAR LA CARGA DE NUEVOS GASTOS (POST)
     if request.method == 'POST':
@@ -122,6 +125,7 @@ def gestion_gastos_generales(request):
         'm_filtro': request.GET.get('metodo_pago', ''),
     })
 
+@login_required
 def exportar_gastos_excel(request):
     gastos = GastoGeneral.objects.all().order_by('-fecha')
     
