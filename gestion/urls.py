@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import actualizar_stock_manual, dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, inventario_dashboard, procesar_stock_pdf, subir_factura, home, subir_inventario_excel
+from .views import actualizar_stock_manual, dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, inventario_dashboard, subir_factura, home, subir_inventario_excel
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
