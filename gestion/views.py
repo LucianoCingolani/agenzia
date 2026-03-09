@@ -248,3 +248,19 @@ def actualizar_stock_manual(request, producto_id):
             messages.error(request, "El valor ingresado no es válido.")
             
     return redirect('inventario_dashboard')
+
+
+@login_required
+def actualizar_umbral_manual(request, producto_id):
+    if request.method == 'POST':
+        nuevo_umbral = request.POST.get('nuevo_umbral')
+        producto = get_object_or_404(Producto, id=producto_id)
+        
+        try:
+            producto.umbral_minimo = int(nuevo_umbral)
+            producto.save()
+            messages.success(request, f"Umbral de {producto.nombre} actualizado a {nuevo_umbral}.")
+        except (ValueError, TypeError):
+            messages.error(request, "El valor del umbral debe ser un número.")
+            
+    return redirect('inventario_dashboard')

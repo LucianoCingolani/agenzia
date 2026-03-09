@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import actualizar_stock_manual, dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, inventario_dashboard, subir_factura, home, subir_inventario_excel
+from .views import actualizar_stock_manual, actualizar_umbral_manual, dashboard_resumen, exportar_gastos_excel, gestion_gastos_generales, inventario_dashboard, subir_factura, home, subir_inventario_excel
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
@@ -13,5 +13,6 @@ urlpatterns = [
     path('inventario/', inventario_dashboard, name='inventario_dashboard'),
     path('inventario/subir-excel/', subir_inventario_excel, name='subir_inventario_excel'),
     path('inventario/actualizar/<int:producto_id>/', actualizar_stock_manual, name='actualizar_stock_manual'),
+    path('inventario/umbral/<int:producto_id>/', actualizar_umbral_manual, name='actualizar_umbral_manual'),
     path('', home, name='home'),
 ]

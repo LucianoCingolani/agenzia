@@ -13,7 +13,7 @@
     {% endif %}
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
-        <h2 class="fw-bold m-0 mb-3 mb-md-0">Control de Stock</h2>
+        <h2 class="fw-bold m-0 mb-3 mb-md-0 text-dark">Control de Stock</h2>
         <button class="btn btn-outline-success btn-sm shadow-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUpload">
             <i class="bi bi-file-earmark-excel"></i> Cargar Inventario Excel
         </button>
@@ -29,9 +29,14 @@
                         <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required>
                     </div>
                     <div class="col-md-3 mt-3 mt-md-0">
-                        <button type="submit" class="btn btn-success w-100 mt-md-4">Subir y Actualizar</button>
+                        <button type="submit" class="btn btn-success w-100 mt-md-4 shadow-sm">
+                            Subir y Actualizar
+                        </button>
                     </div>
                 </div>
+                <p class="small text-muted mt-2 mb-0">
+                    <i class="bi bi-info-circle"></i> El sistema procesará todas las páginas del Excel de Lord Cleaner.
+                </p>
             </form>
         </div>
     </div>
@@ -39,9 +44,18 @@
     <div class="row g-3 mb-4">
         {% if criticos %}
         <div class="col-12">
-            <div class="alert alert-danger border-0 shadow-sm m-0" style="border-radius: 12px;">
+            <div class="alert alert-danger border-0 shadow-sm m-0" style="border-radius: 12px; background-color: #f8d7da;">
                 <h6 class="alert-heading fw-bold mb-1"><i class="bi bi-x-circle-fill me-2"></i>REPOSICIÓN INMEDIATA</h6>
-                <small>Hay {{ criticos|length }} productos por debajo del mínimo.</small>
+                <p class="small mb-0">Hay {{ criticos|length }} productos por debajo del umbral mínimo.</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% if advertencias %}
+        <div class="col-12">
+            <div class="alert alert-warning border-0 shadow-sm m-0" style="border-radius: 12px; background-color: #fff3cd;">
+                <h6 class="alert-heading fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2"></i>PRÓXIMOS A AGOTARSE</h6>
+                <p class="small mb-0">Revisar stock de {{ advertencias|length }} productos en zona de precaución.</p>
             </div>
         </div>
         {% endif %}
@@ -50,7 +64,7 @@
     <div class="sticky-top bg-white py-2 mb-3" style="top: 0; z-index: 1020;">
         <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
             <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar producto..." onkeyup="filterTable()">
+            <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar producto por nombre..." onkeyup="filterTable()">
         </div>
     </div>
 
@@ -61,7 +75,6 @@
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div style="max-width: 70%;">
                         <h6 class="fw-bold mb-1 text-dark">{{ p.nombre }}</h6>
-                        <small class="text-muted">Mínimo: {{ p.umbral_minimo }}</small>
                     </div>
                     {% if p.necesita_reposicion_urgente %}
                         <span class="badge bg-danger rounded-pill">Crítico</span>
@@ -74,12 +87,23 @@
                 
                 <form action="{% url 'actualizar_stock_manual' p.id %}" method="POST" class="d-flex align-items-center bg-light p-2 rounded-3 mt-2">
                     {% csrf_token %}
-                    <label class="small fw-bold me-2 text-muted">Stock:</label>
+                    <label class="small fw-bold me-2 text-muted" style="width: 50px;">Stock:</label>
                     <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" 
-                           class="form-control form-control-sm text-center fw-bold border-0" 
-                           style="width: 80px; background: transparent;" inputmode="numeric">
-                    <button type="submit" class="btn btn-sm btn-primary ms-auto rounded-circle" style="width: 32px; height: 32px; padding: 0;">
+                           class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" 
+                           style="width: 80px;" inputmode="numeric">
+                    <button type="submit" class="btn btn-sm btn-primary ms-auto rounded-circle shadow-sm" style="width: 32px; height: 32px; padding: 0;">
                         <i class="bi bi-check"></i>
+                    </button>
+                </form>
+
+                <form action="{% url 'actualizar_umbral_manual' p.id %}" method="POST" class="d-flex align-items-center p-2 mt-1">
+                    {% csrf_token %}
+                    <label class="small fw-bold me-2 text-secondary" style="width: 50px;">Mín:</label>
+                    <input type="number" name="nuevo_umbral" value="{{ p.umbral_minimo }}" 
+                           class="form-control form-control-sm text-center border-bottom border-0 rounded-0" 
+                           style="width: 60px; background: transparent;" inputmode="numeric">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary ms-2 border-0">
+                        <i class="bi bi-save"></i>
                     </button>
                 </form>
             </div>
@@ -95,7 +119,7 @@
                         <tr>
                             <th class="ps-4 py-3 border-0">Producto</th>
                             <th class="py-3 border-0">Stock Actual</th>
-                            <th class="py-3 border-0 text-center">Umbral</th>
+                            <th class="py-3 border-0">Umbral Mín.</th>
                             <th class="py-3 border-0 text-center">Estado</th>
                         </tr>
                     </thead>
@@ -107,12 +131,29 @@
                                 <form action="{% url 'actualizar_stock_manual' p.id %}" method="POST" class="d-flex align-items-center">
                                     {% csrf_token %}
                                     <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" class="form-control form-control-sm me-2">
-                                    <button type="submit" class="btn btn-sm btn-link p-0 text-primary"><i class="bi bi-check-circle-fill fs-5"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-link p-0 text-primary">
+                                        <i class="bi bi-check-circle-fill fs-5 shadow-sm"></i>
+                                    </button>
                                 </form>
                             </td>
-                            <td class="text-center">{{ p.umbral_minimo }}</td>
+                            <td style="width: 140px;">
+                                <form action="{% url 'actualizar_umbral_manual' p.id %}" method="POST" class="d-flex align-items-center">
+                                    {% csrf_token %}
+                                    <input type="number" name="nuevo_umbral" value="{{ p.umbral_minimo }}" class="form-control form-control-sm me-2" style="width: 70px;">
+                                    <button type="submit" class="btn btn-sm text-secondary">
+                                        <i class="bi bi-save"></i>
+                                    </button>
+                                </form>
+                            </td>
                             <td class="text-center">
-                                </td>
+                                {% if p.necesita_reposicion_urgente %}
+                                    <span class="badge bg-danger p-2 px-3" style="border-radius: 20px;">Crítico</span>
+                                {% elif p.necesita_reposicion %}
+                                    <span class="badge bg-warning text-dark p-2 px-3" style="border-radius: 20px;">Bajo</span>
+                                {% else %}
+                                    <span class="badge bg-success p-2 px-3" style="border-radius: 20px;">OK</span>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -127,20 +168,20 @@ function filterTable() {
     let input = document.getElementById("searchInput");
     let filter = input.value.toUpperCase();
     
-    // Filtra Tarjetas (Móvil)
+    // Filtrar Tarjetas (Móvil)
     let cards = document.getElementsByClassName("item-card");
-    for (let card of cards) {
-        let name = card.querySelector("h6").innerText;
-        card.style.display = name.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+    for (let i = 0; i < cards.length; i++) {
+        let name = cards[i].querySelector("h6").innerText;
+        cards[i].style.display = name.toUpperCase().indexOf(filter) > -1 ? "" : "none";
     }
 
-    // Filtra Tabla (PC)
+    // Filtrar Tabla (PC)
     let rows = document.getElementsByClassName("item-row");
-    for (let row of rows) {
-        let td = row.querySelector("td");
-        if (td) {
-            let text = td.textContent || td.innerText;
-            row.style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+    for (let i = 0; i < rows.length; i++) {
+        let firstCol = rows[i].getElementsByTagName("td")[0];
+        if (firstCol) {
+            let text = firstCol.textContent || firstCol.innerText;
+            rows[i].style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
         }
     }
 }
