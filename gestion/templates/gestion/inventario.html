@@ -31,14 +31,9 @@
                         <input type="file" name="archivo_excel" class="form-control" accept=".xlsx" required>
                     </div>
                     <div class="col-md-3 mt-3 mt-md-0">
-                        <button type="submit" class="btn btn-success w-100 mt-md-4 shadow-sm">
-                            Subir y Actualizar
-                        </button>
+                        <button type="submit" class="btn btn-success w-100 mt-md-4 shadow-sm">Subir y Actualizar</button>
                     </div>
                 </div>
-                <p class="small text-muted mt-2 mb-0">
-                    <i class="bi bi-info-circle"></i> El sistema procesará todas las páginas del Excel de Lord Cleaner.
-                </p>
             </form>
         </div>
     </div>
@@ -52,7 +47,6 @@
             </div>
         </div>
         {% endif %}
-        
         {% if advertencias %}
         <div class="col-12">
             <div class="alert alert-warning border-0 shadow-sm m-0" style="border-radius: 12px; background-color: #fff3cd;">
@@ -64,15 +58,29 @@
     </div>
 
     <div class="sticky-top bg-white py-2 mb-3" style="top: 0; z-index: 1020;">
-        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
-            <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar producto por nombre..." onkeyup="filterTable()">
+        <div class="row g-2">
+            <div class="col-7 col-md-9">
+                <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                    <span class="input-group-text bg-white border-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="searchInput" class="form-control border-0" placeholder="Buscar..." onkeyup="filterTable()">
+                </div>
+            </div>
+            <div class="col-5 col-md-3">
+                <select id="statusFilter" class="form-select shadow-sm border-0" style="border-radius: 10px;" onchange="filterTable()">
+                    <option value="ALL">Todos</option>
+                    <option value="CRITICO">Crítico</option>
+                    <option value="BAJO">Bajo</option>
+                    <option value="OK">Ok</option>
+                </select>
+            </div>
         </div>
     </div>
 
     <div class="d-md-none" id="mobileView">
         {% for p in todos %}
-        <div class="card mb-3 border-0 shadow-sm item-card" style="border-radius: 15px;">
+        <div class="card mb-3 border-0 shadow-sm item-card" 
+             style="border-radius: 15px;"
+             data-status="{% if p.necesita_reposicion_urgente %}CRITICO{% elif p.necesita_reposicion %}BAJO{% else %}OK{% endif %}">
             <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div style="max-width: 70%;">
@@ -86,27 +94,17 @@
                         <span class="badge bg-success rounded-pill">OK</span>
                     {% endif %}
                 </div>
-                
                 <form action="{% url 'actualizar_stock_manual' p.id %}" method="POST" class="d-flex align-items-center bg-light p-2 rounded-3 mt-2">
                     {% csrf_token %}
                     <label class="small fw-bold me-2 text-muted" style="width: 50px;">Stock:</label>
-                    <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" 
-                           class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" 
-                           style="width: 80px;" inputmode="numeric">
-                    <button type="submit" class="btn btn-sm btn-primary ms-auto rounded-circle shadow-sm" style="width: 32px; height: 32px; padding: 0;">
-                        <i class="bi bi-check"></i>
-                    </button>
+                    <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" class="form-control form-control-sm text-center fw-bold border-0 bg-transparent" style="width: 80px;" inputmode="numeric">
+                    <button type="submit" class="btn btn-sm btn-primary ms-auto rounded-circle shadow-sm" style="width: 32px; height: 32px; padding: 0;"><i class="bi bi-check"></i></button>
                 </form>
-
                 <form action="{% url 'actualizar_umbral_manual' p.id %}" method="POST" class="d-flex align-items-center p-2 mt-1">
                     {% csrf_token %}
                     <label class="small fw-bold me-2 text-secondary" style="width: 50px;">Mín:</label>
-                    <input type="number" name="nuevo_umbral" value="{{ p.umbral_minimo }}" 
-                           class="form-control form-control-sm text-center border-bottom border-0 rounded-0" 
-                           style="width: 60px; background: transparent;" inputmode="numeric">
-                    <button type="submit" class="btn btn-sm btn-outline-secondary ms-2 border-0">
-                        <i class="bi bi-save"></i>
-                    </button>
+                    <input type="number" name="nuevo_umbral" value="{{ p.umbral_minimo }}" class="form-control form-control-sm text-center border-bottom border-0 rounded-0" style="width: 60px; background: transparent;" inputmode="numeric">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary ms-2 border-0"><i class="bi bi-save"></i></button>
                 </form>
             </div>
         </div>
@@ -127,24 +125,20 @@
                     </thead>
                     <tbody>
                         {% for p in todos %}
-                        <tr class="item-row">
+                        <tr class="item-row" data-status="{% if p.necesita_reposicion_urgente %}CRITICO{% elif p.necesita_reposicion %}BAJO{% else %}OK{% endif %}">
                             <td class="ps-4 fw-bold text-dark">{{ p.nombre }}</td>
                             <td style="width: 160px;">
                                 <form action="{% url 'actualizar_stock_manual' p.id %}" method="POST" class="d-flex align-items-center">
                                     {% csrf_token %}
                                     <input type="number" name="nuevo_stock" value="{{ p.stock_actual }}" class="form-control form-control-sm me-2">
-                                    <button type="submit" class="btn btn-sm btn-link p-0 text-primary">
-                                        <i class="bi bi-check-circle-fill fs-5 shadow-sm"></i>
-                                    </button>
+                                    <button type="submit" class="btn btn-sm btn-link p-0 text-primary"><i class="bi bi-check-circle-fill fs-5 shadow-sm"></i></button>
                                 </form>
                             </td>
                             <td style="width: 140px;">
                                 <form action="{% url 'actualizar_umbral_manual' p.id %}" method="POST" class="d-flex align-items-center">
                                     {% csrf_token %}
                                     <input type="number" name="nuevo_umbral" value="{{ p.umbral_minimo }}" class="form-control form-control-sm me-2" style="width: 70px;">
-                                    <button type="submit" class="btn btn-sm text-secondary">
-                                        <i class="bi bi-save"></i>
-                                    </button>
+                                    <button type="submit" class="btn btn-sm text-secondary"><i class="bi bi-save"></i></button>
                                 </form>
                             </td>
                             <td class="text-center">
@@ -167,23 +161,33 @@
 
 <script>
 function filterTable() {
-    let input = document.getElementById("searchInput");
-    let filter = input.value.toUpperCase();
+    let searchTerm = document.getElementById("searchInput").value.toUpperCase();
+    let statusFilter = document.getElementById("statusFilter").value;
     
-    // Filtrar Tarjetas (Móvil)
+    // 1. Filtrar Tarjetas Móviles
     let cards = document.getElementsByClassName("item-card");
-    for (let i = 0; i < cards.length; i++) {
-        let name = cards[i].querySelector("h6").innerText;
-        cards[i].style.display = name.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+    for (let card of cards) {
+        let name = card.querySelector("h6").innerText.toUpperCase();
+        let status = card.getAttribute("data-status");
+        
+        let matchName = name.indexOf(searchTerm) > -1;
+        let matchStatus = (statusFilter === "ALL") || (status === statusFilter);
+        
+        card.style.display = (matchName && matchStatus) ? "" : "none";
     }
 
-    // Filtrar Tabla (PC)
+    // 2. Filtrar Tabla PC
     let rows = document.getElementsByClassName("item-row");
-    for (let i = 0; i < rows.length; i++) {
-        let firstCol = rows[i].getElementsByTagName("td")[0];
-        if (firstCol) {
-            let text = firstCol.textContent || firstCol.innerText;
-            rows[i].style.display = text.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+    for (let row of rows) {
+        let nameCell = row.getElementsByTagName("td")[0];
+        if (nameCell) {
+            let name = nameCell.textContent.toUpperCase();
+            let status = row.getAttribute("data-status");
+            
+            let matchName = name.indexOf(searchTerm) > -1;
+            let matchStatus = (statusFilter === "ALL") || (status === statusFilter);
+            
+            row.style.display = (matchName && matchStatus) ? "" : "none";
         }
     }
 }
