@@ -55,6 +55,7 @@
                         <option value="">Todos</option>
                         <option value="FIJO" {% if t_filtro == 'FIJO' %}selected{% endif %}>Fijos</option>
                         <option value="VARIABLE" {% if t_filtro == 'VARIABLE' %}selected{% endif %}>Variables</option>
+                        <option value="COMPRA" {% if t_filtro == 'COMPRA' %}selected{% endif %}>Compras</option>
                     </select>
                 </div>
                 <div class="col-md-3 d-flex gap-2">
@@ -93,6 +94,8 @@
                     <td>
                         {% if g.tipo == 'FIJO' %}
                             <span class="badge border text-dark" style="background-color: #e3f2fd;">Fijo</span>
+                        {% elif g.tipo == 'COMPRA' %}
+                            <span class="badge border text-dark" style="background-color: #e8f5e9;">Compra</span>
                         {% else %}
                             <span class="badge border text-dark" style="background-color: #f5f5f5;">Variable</span>
                         {% endif %}
@@ -154,6 +157,7 @@
                             <select name="tipo" class="form-select" required>
                                 <option value="VARIABLE">Variable</option>
                                 <option value="FIJO">Fijo</option>
+                                <option value="COMPRA">Compra (no cuenta en el total)</option>
                             </select>
                         </div>
                         <div class="col-md-5 mb-3">

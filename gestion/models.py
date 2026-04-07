@@ -34,6 +34,7 @@ class GastoGeneral(models.Model):
     TIPOS = [
             ('FIJO', 'Gasto Fijo'),
             ('VARIABLE', 'Gasto Variable'),
+            ('COMPRA', 'Compra'),
     ]
     METODOS_PAGO = [
         ('EFECTIVO', 'Efectivo'),

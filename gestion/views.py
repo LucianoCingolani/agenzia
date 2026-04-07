@@ -95,17 +95,21 @@ def gestion_gastos_generales(request):
     if t_filtro:
         gastos = gastos.filter(tipo=t_filtro)
 
-    # 3. LÓGICA PARA EL GRÁFICO Y RESUMEN (Basado en lo filtrado)
+    # 3. LÓGICA PARA EL GRÁFICO Y RESUMEN (Basado en lo filtrado, sin Compras)
+    # Excluimos las Compras del total y del gráfico
+    gastos_sin_compras = gastos.exclude(tipo='COMPRA')
+
     # Sumamos los montos agrupados por categoría para el gráfico de dona
-    resumen_query = gastos.values('categoria').annotate(total=Sum('monto'))
-    
+    # order_by() limpia el orden heredado para evitar duplicados en el GROUP BY
+    resumen_query = gastos_sin_compras.order_by().values('categoria').annotate(total=Sum('monto'))
+
     # Diccionario para que el gráfico muestre nombres lindos
     nombres_categorias = dict(GastoGeneral.CATEGORIAS)
-    
+
     labels = [nombres_categorias.get(item['categoria']) for item in resumen_query]
     valores = [float(item['total']) for item in resumen_query]
-    
-    # Calculamos el total de la selección actual para la tarjeta roja
+
+    # Calculamos el total de la selección actual para la tarjeta roja (sin Compras)
     total_filtrado = sum(valores)
 
     # 4. RENDERIZADO
@@ -113,7 +117,7 @@ def gestion_gastos_generales(request):
         'gastos': gastos,
         'total': total_filtrado,
         'categorias': GastoGeneral.CATEGORIAS,
-        'tipos': [('FIJO', 'Gasto Fijo'), ('VARIABLE', 'Gasto Variable')],
+        'tipos': GastoGeneral.TIPOS,
         'metodos_pago': GastoGeneral.METODOS_PAGO,
         # Datos para Chart.js
         'labels_js': json.dumps(labels),
